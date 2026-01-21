@@ -1,0 +1,5 @@
+{
+  "name": "Field Sales Audio Intelligence",
+  "description": "A field sales intelligence tool that transcribes and analyzes audio recordings to extract business insights using Gemini.",
+  "requestFramePermissions": []
+}
