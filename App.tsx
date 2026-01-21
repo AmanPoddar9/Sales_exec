@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
 import FileUpload from './components/FileUpload';
+import AudioRecorder from './components/AudioRecorder'; // Import new component
 import AnalysisView from './components/AnalysisView';
 import { analyzeAudio } from './services/apiService';
 import { AnalysisResult, AppState } from './types';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
+  const [activeTab, setActiveTab] = useState<'upload' | 'record'>('upload'); // New Tab State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
+    setAppState(AppState.IDLE);
+    setAnalysisResult(null);
+    setErrorMsg(null);
+  };
+
+  // Handle file from recorder
+  const handleRecordingComplete = (file: File) => {
+    setSelectedFile(file);
+    // Auto-analyze or just set state? Let's just set state and let user click Analyze, 
+    // or maybe show the file ready to analyze.
+    // For better experience, let's treat it like a selected file.
     setAppState(AppState.IDLE);
     setAnalysisResult(null);
     setErrorMsg(null);
@@ -74,13 +87,41 @@ const App: React.FC = () => {
            </div>
         )}
 
-        {/* Upload Area */}
+        {/* Upload/Record Tabs */}
+        {appState !== AppState.SUCCESS && (
+        <div className="max-w-3xl mx-auto mb-8">
+            <div className="bg-slate-100 p-1 rounded-lg inline-flex w-full sm:w-auto">
+                <button 
+                    onClick={() => { setActiveTab('upload'); setSelectedFile(null); }}
+                    className={`flex-1 sm:w-40 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'upload' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    Upload File
+                </button>
+                <button 
+                    onClick={() => { setActiveTab('record'); setSelectedFile(null); }}
+                    className={`flex-1 sm:w-40 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'record' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    Record Audio
+                </button>
+            </div>
+        </div>
+        )}
+
+        {/* Action Area */}
         <div className="max-w-3xl mx-auto mb-10 transition-all duration-300">
-           {appState !== AppState.SUCCESS && (
-              <FileUpload 
-                onFileSelect={handleFileSelect} 
-                disabled={appState === AppState.PROCESSING} 
-              />
+           {appState !== AppState.SUCCESS && !selectedFile && (
+               <>
+                 {activeTab === 'upload' ? (
+                    <FileUpload 
+                        onFileSelect={handleFileSelect} 
+                        disabled={appState === AppState.PROCESSING} 
+                    />
+                 ) : (
+                    <AudioRecorder 
+                        onRecordingComplete={handleRecordingComplete}
+                    />
+                 )}
+               </>
            )}
         </div>
 
