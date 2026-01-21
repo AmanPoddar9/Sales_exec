@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 import logging
-from main import validate_env, transcribe_audio, analyze_conversation
+from .services import validate_env, transcribe_audio, analyze_conversation
 import json
 
 # Configure logging
